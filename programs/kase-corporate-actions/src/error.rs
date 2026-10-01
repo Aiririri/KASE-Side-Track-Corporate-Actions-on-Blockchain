@@ -10,4 +10,8 @@ pub enum ErrorCode {
     InvalidCouponFrequency,
     #[msg("Maturity date must be in the future")]
     MaturityInPast,
+    #[msg("Amount must be greater than zero")]
+    InvalidAmount,
+    #[msg("Bond series is not active")]
+    BondNotActive,
 }

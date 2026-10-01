@@ -32,4 +32,8 @@ pub mod kase_corporate_actions {
             maturity_ts,
         )
     }
+
+    pub fn issue_bonds(ctx: Context<IssueBonds>, amount: u64) -> Result<()> {
+        crate::instructions::issue_bonds::handle_issue_bonds(ctx, amount)
+    }
 }

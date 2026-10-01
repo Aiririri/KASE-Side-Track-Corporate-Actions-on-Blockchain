@@ -136,3 +136,89 @@ fn rejects_bad_coupon_frequency() {
     let ix = init_ix(&authority.pubkey(), payment_mint, 1, 1000, 3, MATURITY_TS);
     assert!(!send(&mut svm, &authority, ix));
 }
+
+// ---------- issue_bonds ----------
+
+fn ata(wallet: &Pubkey, mint: &Pubkey) -> Pubkey {
+    Pubkey::find_program_address(
+        &[wallet.as_ref(), anchor_spl::token::ID.as_ref(), mint.as_ref()],
+        &anchor_spl::associated_token::ID,
+    )
+    .0
+}
+
+fn issue_ix(
+    signer: &Pubkey,
+    issuer: &Pubkey,
+    series_id: u64,
+    holder: &Pubkey,
+    amount: u64,
+) -> Instruction {
+    let (bond_series, bond_mint, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::IssueBonds { amount }.data(),
+        kase_corporate_actions::accounts::IssueBonds {
+            authority: *signer,
+            bond_series,
+            bond_mint,
+            holder: *holder,
+            holder_token_account: ata(holder, &bond_mint),
+            token_program: anchor_spl::token::ID,
+            associated_token_program: anchor_spl::associated_token::ID,
+            system_program: system_program::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn token_balance(svm: &LiteSVM, addr: &Pubkey) -> u64 {
+    let acc = svm.get_account(addr).unwrap();
+    u64::from_le_bytes(acc.data[64..72].try_into().unwrap())
+}
+
+fn mint_supply(svm: &LiteSVM, addr: &Pubkey) -> u64 {
+    let acc = svm.get_account(addr).unwrap();
+    u64::from_le_bytes(acc.data[36..44].try_into().unwrap())
+}
+
+#[test]
+fn issues_bonds_to_holder() {
+    let (mut svm, authority, payment_mint) = setup();
+    let init = init_ix(&authority.pubkey(), payment_mint, 1, 1000, 2, MATURITY_TS);
+    assert!(send(&mut svm, &authority, init));
+
+    let holder = Keypair::new();
+    let (_, bond_mint, _) = pdas(&authority.pubkey(), 1);
+
+    let ix = issue_ix(&authority.pubkey(), &authority.pubkey(), 1, &holder.pubkey(), 10);
+    assert!(send(&mut svm, &authority, ix));
+    let ix = issue_ix(&authority.pubkey(), &authority.pubkey(), 1, &holder.pubkey(), 5);
+    assert!(send(&mut svm, &authority, ix));
+
+    assert_eq!(token_balance(&svm, &ata(&holder.pubkey(), &bond_mint)), 15);
+    assert_eq!(mint_supply(&svm, &bond_mint), 15);
+}
+
+#[test]
+fn only_authority_can_issue() {
+    let (mut svm, authority, payment_mint) = setup();
+    let init = init_ix(&authority.pubkey(), payment_mint, 1, 1000, 2, MATURITY_TS);
+    assert!(send(&mut svm, &authority, init));
+
+    let attacker = Keypair::new();
+    svm.airdrop(&attacker.pubkey(), 1_000_000_000).unwrap();
+    let ix = issue_ix(&attacker.pubkey(), &authority.pubkey(), 1, &attacker.pubkey(), 10);
+    assert!(!send(&mut svm, &attacker, ix));
+}
+
+#[test]
+fn rejects_zero_amount() {
+    let (mut svm, authority, payment_mint) = setup();
+    let init = init_ix(&authority.pubkey(), payment_mint, 1, 1000, 2, MATURITY_TS);
+    assert!(send(&mut svm, &authority, init));
+
+    let holder = Keypair::new();
+    let ix = issue_ix(&authority.pubkey(), &authority.pubkey(), 1, &holder.pubkey(), 0);
+    assert!(!send(&mut svm, &authority, ix));
+}
