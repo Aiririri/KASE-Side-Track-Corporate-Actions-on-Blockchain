@@ -15,11 +15,21 @@ declare_id!("CNbAp4fpVhCP6TQ1uPkJv5VZHVZbffM2gvyVXFNJXYbX");
 pub mod kase_corporate_actions {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        crate::instructions::initialize::handle_initialize(ctx)
-    }
-
-    pub fn increment(ctx: Context<Increment>) -> Result<()> {
-        crate::instructions::increment::handle_increment(ctx)
+    pub fn initialize_bond(
+        ctx: Context<InitializeBond>,
+        series_id: u64,
+        face_value: u64,
+        coupon_rate_bps: u16,
+        coupons_per_year: u8,
+        maturity_ts: i64,
+    ) -> Result<()> {
+        crate::instructions::initialize_bond::handle_initialize_bond(
+            ctx,
+            series_id,
+            face_value,
+            coupon_rate_bps,
+            coupons_per_year,
+            maturity_ts,
+        )
     }
 }

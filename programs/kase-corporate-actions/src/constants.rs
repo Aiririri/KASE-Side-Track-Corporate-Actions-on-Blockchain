@@ -1,10 +1,13 @@
 use anchor_lang::prelude::*;
 
 #[constant]
-pub const COUNTER_SEED: &[u8] = b"counter";
+pub const BOND_SEED: &[u8] = b"bond";
 
 #[constant]
-pub const HELLO_WORLD_LAMPORTS: u64 = 1;
+pub const MINT_SEED: &[u8] = b"bond_mint";
 
 #[constant]
-pub const MAX_COUNT: u64 = 10;
+pub const VAULT_SEED: &[u8] = b"vault";
+
+#[constant]
+pub const BPS_DENOMINATOR: u64 = 10_000;
