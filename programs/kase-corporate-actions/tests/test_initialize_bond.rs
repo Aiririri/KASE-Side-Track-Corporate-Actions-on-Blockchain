@@ -775,3 +775,185 @@ fn frozen_holder_must_be_thawed_first() {
     assert!(!send(&mut svm, &h1, redeem_ix(&a, 1, &h1.pubkey(), h1_pay)));
     assert_eq!(token_balance(&svm, &h1_pay), 0);
 }
+
+// ---------- partial redemption ----------
+
+fn partial_receipt_pda(round: &Pubkey, holder_ata: &Pubkey) -> Pubkey {
+    Pubkey::find_program_address(
+        &[PARTIAL_SEED, round.as_ref(), holder_ata.as_ref()],
+        &kase_corporate_actions::id(),
+    )
+    .0
+}
+
+fn schedule_partial_ix(signer: &Pubkey, issuer: &Pubkey, series_id: u64, round_idx: u32, bps: u16) -> Instruction {
+    let (bond_series, _, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::SchedulePartialRedemption { bps }.data(),
+        kase_corporate_actions::accounts::SchedulePartialRedemption {
+            authority: *signer,
+            bond_series,
+            coupon_round: round_pda(&bond_series, round_idx),
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn pay_partial_ix(
+    signer: &Pubkey,
+    issuer: &Pubkey,
+    series_id: u64,
+    round_idx: u32,
+    holder: &Pubkey,
+    holder_payment_account: Pubkey,
+) -> Instruction {
+    let (bond_series, bond_mint, vault) = pdas(issuer, series_id);
+    let round = round_pda(&bond_series, round_idx);
+    let holder_ata = ata(holder, &bond_mint);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::PayPartialRedemption {}.data(),
+        kase_corporate_actions::accounts::PayPartialRedemption {
+            authority: *signer,
+            bond_series,
+            bond_mint,
+            coupon_round: round,
+            holder_token_account: holder_ata,
+            holder_payment_account,
+            vault,
+            receipt: partial_receipt_pda(&round, &holder_ata),
+            token_program: anchor_spl::token::ID,
+            system_program: system_program::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn apply_partial_ix(signer: &Pubkey, issuer: &Pubkey, series_id: u64, round_idx: u32) -> Instruction {
+    let (bond_series, _, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::ApplyPartialRedemption {}.data(),
+        kase_corporate_actions::accounts::ApplyPartialRedemption {
+            authority: *signer,
+            bond_series,
+            coupon_round: round_pda(&bond_series, round_idx),
+        }
+        .to_account_metas(None),
+    )
+}
+
+#[test]
+fn partial_redemption_flow() {
+    let (mut svm, authority, payment_mint, h1, h2) = prepare_snapshot();
+    let a = authority.pubkey();
+    let (bond, _bond_mint, vault) = pdas(&a, 1);
+    let round = round_pda(&bond, 0);
+
+    let issuer_pay = Pubkey::new_unique();
+    let h1_pay = Pubkey::new_unique();
+    let h2_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 20_000_000_000);
+    put_token_account(&mut svm, h1_pay, &payment_mint, &h1.pubkey(), 0);
+    put_token_account(&mut svm, h2_pay, &payment_mint, &h2.pubkey(), 0);
+    // Нужно: купон $750 + амортизация 25% × 15 × $1000 = $3750, итого $4500
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 4_500_000_000)));
+
+    // Объявляем частичное погашение 25%
+    assert!(send(&mut svm, &authority, schedule_partial_ix(&a, &a, 1, 0, 2500)));
+    let r = read_round(&svm, &round);
+    assert_eq!(r.partial_per_bond, 250_000_000); // $250 на облигацию
+    assert_eq!(r.partial_total_due, 3_750_000_000);
+
+    // Холдер 1: 10 × $250 = $2500
+    assert!(send(&mut svm, &authority, pay_partial_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 2_500_000_000);
+
+    // Двойная выплата невозможна
+    assert!(!send(&mut svm, &authority, pay_partial_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 2_500_000_000);
+
+    // Применить нельзя, пока не выплачено всем
+    assert!(!send(&mut svm, &authority, apply_partial_ix(&a, &a, 1, 0)));
+    assert_eq!(read_bond(&svm, &bond).face_value, FACE_VALUE);
+
+    // Холдер 2: 5 × $250 = $1250
+    assert!(send(&mut svm, &authority, pay_partial_ix(&a, &a, 1, 0, &h2.pubkey(), h2_pay)));
+    assert_eq!(token_balance(&svm, &h2_pay), 1_250_000_000);
+
+    // Теперь номинал уменьшается: $1000 -> $750
+    assert!(send(&mut svm, &authority, apply_partial_ix(&a, &a, 1, 0)));
+    assert_eq!(read_bond(&svm, &bond).face_value, 750_000_000);
+    assert!(read_round(&svm, &round).partial_applied);
+
+    // Повторно применить нельзя
+    assert!(!send(&mut svm, &authority, apply_partial_ix(&a, &a, 1, 0)));
+    assert_eq!(read_bond(&svm, &bond).face_value, 750_000_000);
+
+    // Купон этого периода считался по старому номиналу ($500 и $250)
+    assert!(send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert!(send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h2.pubkey(), h2_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 3_000_000_000);
+    assert_eq!(token_balance(&svm, &h2_pay), 1_500_000_000);
+    assert_eq!(token_balance(&svm, &vault), 0);
+
+    // Следующий период считается уже от $750: 750 × 10% ÷ 2 = $37.50
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 1, 3_000)));
+    assert_eq!(read_round(&svm, &round_pda(&bond, 1)).coupon_per_bond, 37_500_000);
+}
+
+#[test]
+fn partial_redemption_rules() {
+    let (mut svm, authority, _pm, _h1, _h2) = prepare_snapshot();
+    let a = authority.pubkey();
+
+    // Доля должна быть от 1 до 9999 bps
+    assert!(!send(&mut svm, &authority, schedule_partial_ix(&a, &a, 1, 0, 0)));
+    assert!(!send(&mut svm, &authority, schedule_partial_ix(&a, &a, 1, 0, 10_000)));
+
+    // Чужой подписант не может объявить погашение
+    let attacker = Keypair::new();
+    svm.airdrop(&attacker.pubkey(), 1_000_000_000).unwrap();
+    let ix = schedule_partial_ix(&attacker.pubkey(), &a, 1, 0, 2500);
+    assert!(!send(&mut svm, &attacker, ix));
+
+    // Эмитент может, но только один раз за период
+    assert!(send(&mut svm, &authority, schedule_partial_ix(&a, &a, 1, 0, 2500)));
+    assert!(!send(&mut svm, &authority, schedule_partial_ix(&a, &a, 1, 0, 1000)));
+}
+
+#[test]
+fn partial_requires_schedule() {
+    let (mut svm, authority, payment_mint, h1, _h2) = prepare_snapshot();
+    let a = authority.pubkey();
+
+    let issuer_pay = Pubkey::new_unique();
+    let h1_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 20_000_000_000);
+    put_token_account(&mut svm, h1_pay, &payment_mint, &h1.pubkey(), 0);
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 4_500_000_000)));
+
+    // Погашение не объявлено: ни выплатить, ни применить нельзя
+    assert!(!send(&mut svm, &authority, pay_partial_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert!(!send(&mut svm, &authority, apply_partial_ix(&a, &a, 1, 0)));
+    assert_eq!(token_balance(&svm, &h1_pay), 0);
+}
+
+#[test]
+fn partial_cannot_be_paid_to_someone_elses_account() {
+    let (mut svm, authority, payment_mint, h1, _h2) = prepare_snapshot();
+    let a = authority.pubkey();
+
+    let issuer_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 20_000_000_000);
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 4_500_000_000)));
+    assert!(send(&mut svm, &authority, schedule_partial_ix(&a, &a, 1, 0, 2500)));
+
+    let thief = Keypair::new();
+    let thief_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, thief_pay, &payment_mint, &thief.pubkey(), 0);
+
+    assert!(!send(&mut svm, &authority, pay_partial_ix(&a, &a, 1, 0, &h1.pubkey(), thief_pay)));
+    assert_eq!(token_balance(&svm, &thief_pay), 0);
+}
