@@ -1,3 +1,4 @@
+pub mod advance_time;
 pub mod apply_partial_redemption;
 pub mod finalize_record_date;
 pub mod freeze_holder;
@@ -11,6 +12,7 @@ pub mod redeem;
 pub mod schedule_partial_redemption;
 pub mod thaw_holder;
 
+pub use advance_time::*;
 pub use apply_partial_redemption::*;
 pub use finalize_record_date::*;
 pub use freeze_holder::*;

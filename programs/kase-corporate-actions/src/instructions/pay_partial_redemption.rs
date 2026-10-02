@@ -92,7 +92,7 @@ pub fn handle_pay_partial_redemption(ctx: Context<PayPartialRedemption>) -> Resu
     );
     token::transfer(cpi_ctx, entitlement)?;
 
-    let now = Clock::get()?.unix_timestamp;
+    let now = ctx.accounts.bond_series.now()?;
     let holder = ctx.accounts.holder_token_account.owner;
     let holder_token_account = ctx.accounts.holder_token_account.key();
     let round_key = ctx.accounts.coupon_round.key();

@@ -29,6 +29,7 @@ pub struct BondSeries {
     pub status: BondStatus,
     pub bump: u8,
     pub next_round: u32,
+    pub time_offset: i64,
 }
 
 #[account]
@@ -75,4 +76,14 @@ pub struct RedemptionReceipt {
     pub amount_paid: u64,
     pub last_ts: i64,
     pub bump: u8,
+}
+
+impl BondSeries {
+    /// Симулированное «сейчас»: часы сети плюс смещение, которое двигает эмитент (для демо)
+    pub fn now(&self) -> Result<i64> {
+        Ok(Clock::get()?
+            .unix_timestamp
+            .checked_add(self.time_offset)
+            .ok_or(crate::error::ErrorCode::MathOverflow)?)
+    }
 }

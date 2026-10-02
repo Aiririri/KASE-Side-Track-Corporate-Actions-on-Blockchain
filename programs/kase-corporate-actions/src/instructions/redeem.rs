@@ -52,7 +52,7 @@ pub struct Redeem<'info> {
 }
 
 pub fn handle_redeem(ctx: Context<Redeem>) -> Result<()> {
-    let now = Clock::get()?.unix_timestamp;
+    let now = ctx.accounts.bond_series.now()?;
     require!(
         now >= ctx.accounts.bond_series.maturity_ts,
         ErrorCode::NotMatured

@@ -30,7 +30,7 @@ pub struct FreezeHolder<'info> {
 }
 
 pub fn handle_freeze_holder(ctx: Context<FreezeHolder>) -> Result<()> {
-    let now = Clock::get()?.unix_timestamp;
+    let now = ctx.accounts.bond_series.now()?;
     require!(
         now >= ctx.accounts.coupon_round.record_ts,
         ErrorCode::RecordDateNotReached

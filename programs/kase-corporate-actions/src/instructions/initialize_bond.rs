@@ -93,7 +93,7 @@ pub fn handle_initialize_bond(
     bond.status = BondStatus::Active;
     bond.bump = bump;
     bond.next_round = 0;
-    bond.next_round = 0;
+    bond.time_offset = 0;
 
     msg!("Bond series {} initialized", series_id);
     Ok(())

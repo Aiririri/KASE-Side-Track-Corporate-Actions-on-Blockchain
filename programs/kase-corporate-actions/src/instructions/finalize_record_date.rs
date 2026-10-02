@@ -24,7 +24,7 @@ pub struct FinalizeRecordDate<'info> {
 }
 
 pub fn handle_finalize_record_date(ctx: Context<FinalizeRecordDate>) -> Result<()> {
-    let now = Clock::get()?.unix_timestamp;
+    let now = ctx.accounts.bond_series.now()?;
     let round = &mut ctx.accounts.coupon_round;
     require!(now >= round.record_ts, ErrorCode::RecordDateNotReached);
 

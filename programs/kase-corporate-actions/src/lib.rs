@@ -81,4 +81,8 @@ pub mod kase_corporate_actions {
     pub fn apply_partial_redemption(ctx: Context<ApplyPartialRedemption>) -> Result<()> {
         crate::instructions::apply_partial_redemption::handle_apply_partial_redemption(ctx)
     }
+
+    pub fn advance_time(ctx: Context<AdvanceTime>, seconds: i64) -> Result<()> {
+        crate::instructions::advance_time::handle_advance_time(ctx, seconds)
+    }
 }
