@@ -48,4 +48,16 @@ pub mod kase_corporate_actions {
     pub fn finalize_record_date(ctx: Context<FinalizeRecordDate>) -> Result<()> {
         crate::instructions::finalize_record_date::handle_finalize_record_date(ctx)
     }
+
+    pub fn fund_vault(ctx: Context<FundVault>, amount: u64) -> Result<()> {
+        crate::instructions::fund_vault::handle_fund_vault(ctx, amount)
+    }
+
+    pub fn pay_coupon(ctx: Context<PayCoupon>) -> Result<()> {
+        crate::instructions::pay_coupon::handle_pay_coupon(ctx)
+    }
+
+    pub fn thaw_holder(ctx: Context<ThawHolder>) -> Result<()> {
+        crate::instructions::thaw_holder::handle_thaw_holder(ctx)
+    }
 }

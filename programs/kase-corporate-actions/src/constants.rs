@@ -13,4 +13,7 @@ pub const VAULT_SEED: &[u8] = b"vault";
 pub const ROUND_SEED: &[u8] = b"round";
 
 #[constant]
+pub const RECEIPT_SEED: &[u8] = b"receipt";
+
+#[constant]
 pub const BPS_DENOMINATOR: u64 = 10_000;

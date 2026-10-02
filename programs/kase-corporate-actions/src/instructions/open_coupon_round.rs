@@ -51,6 +51,8 @@ pub fn handle_open_coupon_round(ctx: Context<OpenCouponRound>, record_ts: i64) -
     round.frozen_supply = 0;
     round.snapshot_supply = 0;
     round.total_due = 0;
+    round.paid_total = 0;
+    round.holders_paid = 0;
     round.status = RoundStatus::Open;
     round.bump = ctx.bumps.coupon_round;
 

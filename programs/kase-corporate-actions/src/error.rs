@@ -24,4 +24,14 @@ pub enum ErrorCode {
     RoundNotOpen,
     #[msg("Not all holders are frozen: snapshot is incomplete")]
     SnapshotIncomplete,
+    #[msg("Coupon round snapshot is not finalized")]
+    RoundNotSnapshotted,
+    #[msg("Invalid payment token account")]
+    InvalidPaymentAccount,
+    #[msg("Holder account must be frozen at record date")]
+    HolderNotFrozen,
+    #[msg("Holder has no bonds to pay")]
+    NothingToPay,
+    #[msg("Total payouts would exceed the amount due")]
+    PayoutExceedsDue,
 }

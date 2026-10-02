@@ -43,4 +43,19 @@ pub struct CouponRound {
     pub total_due: u64,
     pub status: RoundStatus,
     pub bump: u8,
+    pub paid_total: u64,
+    pub holders_paid: u32,
+}
+
+/// Квитанция: доказательство, что этому счёту за этот период уже заплачено
+#[account]
+#[derive(InitSpace)]
+pub struct PayoutReceipt {
+    pub coupon_round: Pubkey,
+    pub holder: Pubkey,
+    pub holder_token_account: Pubkey,
+    pub bonds: u64,
+    pub amount: u64,
+    pub paid_ts: i64,
+    pub bump: u8,
 }
