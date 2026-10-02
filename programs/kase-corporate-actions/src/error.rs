@@ -34,4 +34,8 @@ pub enum ErrorCode {
     NothingToPay,
     #[msg("Total payouts would exceed the amount due")]
     PayoutExceedsDue,
+    #[msg("Bond has not reached maturity yet")]
+    NotMatured,
+    #[msg("Holder token account is frozen: thaw it before redeeming")]
+    HolderAccountFrozen,
 }

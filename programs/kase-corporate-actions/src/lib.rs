@@ -60,4 +60,8 @@ pub mod kase_corporate_actions {
     pub fn thaw_holder(ctx: Context<ThawHolder>) -> Result<()> {
         crate::instructions::thaw_holder::handle_thaw_holder(ctx)
     }
+
+    pub fn redeem(ctx: Context<Redeem>) -> Result<()> {
+        crate::instructions::redeem::handle_redeem(ctx)
+    }
 }

@@ -17,3 +17,6 @@ pub const RECEIPT_SEED: &[u8] = b"receipt";
 
 #[constant]
 pub const BPS_DENOMINATOR: u64 = 10_000;
+
+#[constant]
+pub const REDEEM_SEED: &[u8] = b"redeem";

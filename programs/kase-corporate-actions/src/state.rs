@@ -59,3 +59,15 @@ pub struct PayoutReceipt {
     pub paid_ts: i64,
     pub bump: u8,
 }
+
+/// Квитанция о погашении: накапливается, если холдер гасит несколько раз
+#[account]
+#[derive(InitSpace)]
+pub struct RedemptionReceipt {
+    pub bond_series: Pubkey,
+    pub holder: Pubkey,
+    pub bonds_redeemed: u64,
+    pub amount_paid: u64,
+    pub last_ts: i64,
+    pub bump: u8,
+}
