@@ -397,3 +397,228 @@ fn rejects_record_date_after_maturity() {
     let ix = open_round_ix(&a, &a, 1, 0, MATURITY_TS + 1);
     assert!(!send(&mut svm, &authority, ix));
 }
+
+// ---------- coupon payment ----------
+
+/// Кладём готовый токен-аккаунт в мини-блокчейн (165 байт по формату SPL Token)
+fn put_token_account(svm: &mut LiteSVM, addr: Pubkey, mint: &Pubkey, owner: &Pubkey, amount: u64) {
+    let mut data = vec![0u8; 165];
+    data[0..32].copy_from_slice(mint.as_ref());
+    data[32..64].copy_from_slice(owner.as_ref());
+    data[64..72].copy_from_slice(&amount.to_le_bytes());
+    data[108] = 1; // initialized
+    svm.set_account(
+        addr,
+        Account {
+            lamports: 2_039_280,
+            data,
+            owner: anchor_spl::token::ID,
+            executable: false,
+            rent_epoch: 0,
+        },
+    )
+    .unwrap();
+}
+
+fn receipt_pda(round: &Pubkey, holder_ata: &Pubkey) -> Pubkey {
+    Pubkey::find_program_address(
+        &[RECEIPT_SEED, round.as_ref(), holder_ata.as_ref()],
+        &kase_corporate_actions::id(),
+    )
+    .0
+}
+
+fn fund_ix(signer: &Pubkey, issuer: &Pubkey, series_id: u64, source: Pubkey, amount: u64) -> Instruction {
+    let (bond_series, _, vault) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::FundVault { amount }.data(),
+        kase_corporate_actions::accounts::FundVault {
+            authority: *signer,
+            bond_series,
+            source,
+            vault,
+            token_program: anchor_spl::token::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn pay_ix(
+    signer: &Pubkey,
+    issuer: &Pubkey,
+    series_id: u64,
+    round_idx: u32,
+    holder: &Pubkey,
+    holder_payment_account: Pubkey,
+) -> Instruction {
+    let (bond_series, bond_mint, vault) = pdas(issuer, series_id);
+    let round = round_pda(&bond_series, round_idx);
+    let holder_ata = ata(holder, &bond_mint);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::PayCoupon {}.data(),
+        kase_corporate_actions::accounts::PayCoupon {
+            authority: *signer,
+            bond_series,
+            bond_mint,
+            coupon_round: round,
+            holder_token_account: holder_ata,
+            holder_payment_account,
+            vault,
+            receipt: receipt_pda(&round, &holder_ata),
+            token_program: anchor_spl::token::ID,
+            system_program: system_program::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn thaw_ix(signer: &Pubkey, issuer: &Pubkey, series_id: u64, round_idx: u32, holder: &Pubkey) -> Instruction {
+    let (bond_series, bond_mint, _) = pdas(issuer, series_id);
+    let round = round_pda(&bond_series, round_idx);
+    let holder_ata = ata(holder, &bond_mint);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::ThawHolder {}.data(),
+        kase_corporate_actions::accounts::ThawHolder {
+            authority: *signer,
+            bond_series,
+            bond_mint,
+            coupon_round: round,
+            holder_token_account: holder_ata,
+            receipt: receipt_pda(&round, &holder_ata),
+            token_program: anchor_spl::token::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+/// Выпуск + два холдера (10 и 5 облигаций) + зафиксированный реестр
+fn prepare_snapshot() -> (LiteSVM, Keypair, Pubkey, Keypair, Keypair) {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+    let h1 = Keypair::new();
+    let h2 = Keypair::new();
+    assert!(send(&mut svm, &authority, issue_ix(&a, &a, 1, &h1.pubkey(), 10)));
+    assert!(send(&mut svm, &authority, issue_ix(&a, &a, 1, &h2.pubkey(), 5)));
+    set_time(&mut svm, 1_000);
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 0, 2_000)));
+    set_time(&mut svm, 2_000);
+    assert!(send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h1.pubkey())));
+    assert!(send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h2.pubkey())));
+    assert!(send(&mut svm, &authority, finalize_ix(&a, &a, 1, 0)));
+    (svm, authority, payment_mint, h1, h2)
+}
+
+#[test]
+fn coupon_payment_flow() {
+    let (mut svm, authority, payment_mint, h1, h2) = prepare_snapshot();
+    let a = authority.pubkey();
+    let (bond, bond_mint, vault) = pdas(&a, 1);
+    let round = round_pda(&bond, 0);
+
+    // Платёжные счета: эмитент ($1000), холдеры (пока 0)
+    let issuer_pay = Pubkey::new_unique();
+    let h1_pay = Pubkey::new_unique();
+    let h2_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 1_000_000_000);
+    put_token_account(&mut svm, h1_pay, &payment_mint, &h1.pubkey(), 0);
+    put_token_account(&mut svm, h2_pay, &payment_mint, &h2.pubkey(), 0);
+
+    // Эмитент кладёт в vault ровно сколько нужно: $750
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 750_000_000)));
+    assert_eq!(token_balance(&svm, &vault), 750_000_000);
+    assert_eq!(token_balance(&svm, &issuer_pay), 250_000_000);
+
+    // Холдер 1: 10 облигаций × $1000 × 10% ÷ 2 = $500
+    assert!(send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 500_000_000);
+
+    // Квитанция записана
+    let h1_ata = ata(&h1.pubkey(), &bond_mint);
+    let acc = svm.get_account(&receipt_pda(&round, &h1_ata)).unwrap();
+    let mut data: &[u8] = &acc.data;
+    let receipt = PayoutReceipt::try_deserialize(&mut data).unwrap();
+    assert_eq!(receipt.bonds, 10);
+    assert_eq!(receipt.amount, 500_000_000);
+    assert_eq!(receipt.holder, h1.pubkey());
+
+    // Двойная выплата невозможна
+    assert!(!send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 500_000_000);
+
+    // Разморозить без выплаты нельзя (квитанции ещё нет)
+    assert!(!send(&mut svm, &authority, thaw_ix(&a, &a, 1, 0, &h2.pubkey())));
+
+    // Холдер 2: 5 облигаций, $250
+    assert!(send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h2.pubkey(), h2_pay)));
+    assert_eq!(token_balance(&svm, &h2_pay), 250_000_000);
+
+    // Vault пуст, период сошёлся
+    assert_eq!(token_balance(&svm, &vault), 0);
+    let r = read_round(&svm, &round);
+    assert_eq!(r.paid_total, r.total_due);
+    assert_eq!(r.holders_paid, 2);
+
+    // После выплаты счёт размораживается
+    assert!(send(&mut svm, &authority, thaw_ix(&a, &a, 1, 0, &h1.pubkey())));
+    assert_eq!(svm.get_account(&h1_ata).unwrap().data[108], 1); // 1 = initialized
+}
+
+#[test]
+fn cannot_pay_to_someone_elses_account() {
+    let (mut svm, authority, payment_mint, h1, _h2) = prepare_snapshot();
+    let a = authority.pubkey();
+
+    let issuer_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 1_000_000_000);
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 750_000_000)));
+
+    // Счёт, который принадлежит не холдеру
+    let thief = Keypair::new();
+    let thief_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, thief_pay, &payment_mint, &thief.pubkey(), 0);
+
+    assert!(!send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h1.pubkey(), thief_pay)));
+    assert_eq!(token_balance(&svm, &thief_pay), 0);
+}
+
+#[test]
+fn cannot_pay_with_underfunded_vault() {
+    let (mut svm, authority, payment_mint, h1, _h2) = prepare_snapshot();
+    let a = authority.pubkey();
+
+    let issuer_pay = Pubkey::new_unique();
+    let h1_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 1_000_000_000);
+    put_token_account(&mut svm, h1_pay, &payment_mint, &h1.pubkey(), 0);
+
+    // В vault только $100, а нужно $500
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 100_000_000)));
+    assert!(!send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 0);
+}
+
+#[test]
+fn cannot_pay_before_snapshot_is_finalized() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+    let h1 = Keypair::new();
+    assert!(send(&mut svm, &authority, issue_ix(&a, &a, 1, &h1.pubkey(), 10)));
+    set_time(&mut svm, 1_000);
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 0, 2_000)));
+    set_time(&mut svm, 2_000);
+    assert!(send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h1.pubkey())));
+    // freeze сделан, но finalize ещё нет
+
+    let issuer_pay = Pubkey::new_unique();
+    let h1_pay = Pubkey::new_unique();
+    put_token_account(&mut svm, issuer_pay, &payment_mint, &a, 1_000_000_000);
+    put_token_account(&mut svm, h1_pay, &payment_mint, &h1.pubkey(), 0);
+    assert!(send(&mut svm, &authority, fund_ix(&a, &a, 1, issuer_pay, 500_000_000)));
+
+    assert!(!send(&mut svm, &authority, pay_ix(&a, &a, 1, 0, &h1.pubkey(), h1_pay)));
+}
