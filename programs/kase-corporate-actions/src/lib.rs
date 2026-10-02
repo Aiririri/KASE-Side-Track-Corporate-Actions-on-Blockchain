@@ -36,4 +36,16 @@ pub mod kase_corporate_actions {
     pub fn issue_bonds(ctx: Context<IssueBonds>, amount: u64) -> Result<()> {
         crate::instructions::issue_bonds::handle_issue_bonds(ctx, amount)
     }
+
+    pub fn open_coupon_round(ctx: Context<OpenCouponRound>, record_ts: i64) -> Result<()> {
+        crate::instructions::open_coupon_round::handle_open_coupon_round(ctx, record_ts)
+    }
+
+    pub fn freeze_holder(ctx: Context<FreezeHolder>) -> Result<()> {
+        crate::instructions::freeze_holder::handle_freeze_holder(ctx)
+    }
+
+    pub fn finalize_record_date(ctx: Context<FinalizeRecordDate>) -> Result<()> {
+        crate::instructions::finalize_record_date::handle_finalize_record_date(ctx)
+    }
 }

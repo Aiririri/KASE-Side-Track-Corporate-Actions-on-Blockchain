@@ -6,6 +6,14 @@ pub enum BondStatus {
     Redeemed,
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
+pub enum RoundStatus {
+    /// Период открыт, идёт заморозка холдеров
+    Open,
+    /// Реестр зафиксирован, можно платить
+    Snapshotted,
+}
+
 #[account]
 #[derive(InitSpace)]
 pub struct BondSeries {
@@ -19,5 +27,20 @@ pub struct BondSeries {
     pub coupons_per_year: u8,
     pub maturity_ts: i64,
     pub status: BondStatus,
+    pub bump: u8,
+    pub next_round: u32,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct CouponRound {
+    pub bond_series: Pubkey,
+    pub round_index: u32,
+    pub record_ts: i64,
+    pub coupon_per_bond: u64,
+    pub frozen_supply: u64,
+    pub snapshot_supply: u64,
+    pub total_due: u64,
+    pub status: RoundStatus,
     pub bump: u8,
 }

@@ -95,6 +95,7 @@ fn init_ix(
 }
 
 fn send(svm: &mut LiteSVM, payer: &Keypair, ix: Instruction) -> bool {
+    svm.expire_blockhash();
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(&[ix], Some(&payer.pubkey()), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), &[payer]).unwrap();
@@ -220,5 +221,179 @@ fn rejects_zero_amount() {
 
     let holder = Keypair::new();
     let ix = issue_ix(&authority.pubkey(), &authority.pubkey(), 1, &holder.pubkey(), 0);
+    assert!(!send(&mut svm, &authority, ix));
+}
+
+// ---------- record date ----------
+
+fn set_time(svm: &mut LiteSVM, ts: i64) {
+    let mut clock = svm.get_sysvar::<anchor_lang::prelude::Clock>();
+    clock.unix_timestamp = ts;
+    svm.set_sysvar(&clock);
+}
+
+fn round_pda(bond: &Pubkey, idx: u32) -> Pubkey {
+    Pubkey::find_program_address(
+        &[ROUND_SEED, bond.as_ref(), &idx.to_le_bytes()],
+        &kase_corporate_actions::id(),
+    )
+    .0
+}
+
+fn read_round(svm: &LiteSVM, addr: &Pubkey) -> CouponRound {
+    let acc = svm.get_account(addr).unwrap();
+    let mut data: &[u8] = &acc.data;
+    CouponRound::try_deserialize(&mut data).unwrap()
+}
+
+fn read_bond(svm: &LiteSVM, addr: &Pubkey) -> BondSeries {
+    let acc = svm.get_account(addr).unwrap();
+    let mut data: &[u8] = &acc.data;
+    BondSeries::try_deserialize(&mut data).unwrap()
+}
+
+fn open_round_ix(
+    signer: &Pubkey,
+    issuer: &Pubkey,
+    series_id: u64,
+    round_idx: u32,
+    record_ts: i64,
+) -> Instruction {
+    let (bond_series, _, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::OpenCouponRound { record_ts }.data(),
+        kase_corporate_actions::accounts::OpenCouponRound {
+            authority: *signer,
+            bond_series,
+            coupon_round: round_pda(&bond_series, round_idx),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn freeze_ix(
+    signer: &Pubkey,
+    issuer: &Pubkey,
+    series_id: u64,
+    round_idx: u32,
+    holder: &Pubkey,
+) -> Instruction {
+    let (bond_series, bond_mint, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::FreezeHolder {}.data(),
+        kase_corporate_actions::accounts::FreezeHolder {
+            authority: *signer,
+            bond_series,
+            bond_mint,
+            coupon_round: round_pda(&bond_series, round_idx),
+            holder_token_account: ata(holder, &bond_mint),
+            token_program: anchor_spl::token::ID,
+        }
+        .to_account_metas(None),
+    )
+}
+
+fn finalize_ix(signer: &Pubkey, issuer: &Pubkey, series_id: u64, round_idx: u32) -> Instruction {
+    let (bond_series, bond_mint, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::FinalizeRecordDate {}.data(),
+        kase_corporate_actions::accounts::FinalizeRecordDate {
+            authority: *signer,
+            bond_series,
+            bond_mint,
+            coupon_round: round_pda(&bond_series, round_idx),
+        }
+        .to_account_metas(None),
+    )
+}
+
+#[test]
+fn record_date_flow() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+
+    let h1 = Keypair::new();
+    let h2 = Keypair::new();
+    assert!(send(&mut svm, &authority, issue_ix(&a, &a, 1, &h1.pubkey(), 10)));
+    assert!(send(&mut svm, &authority, issue_ix(&a, &a, 1, &h2.pubkey(), 5)));
+
+    let (bond, bond_mint, _) = pdas(&a, 1);
+    let round = round_pda(&bond, 0);
+
+    // Открываем период: record date = 2000
+    set_time(&mut svm, 1_000);
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 0, 2_000)));
+    let r = read_round(&svm, &round);
+    assert_eq!(r.coupon_per_bond, 50_000_000); // $50 на облигацию
+    assert_eq!(10 * r.coupon_per_bond, 500_000_000); // $500 за 10 штук, как в задании
+    assert!(r.status == RoundStatus::Open);
+
+    // До record date заморозка запрещена
+    assert!(!send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h1.pubkey())));
+
+    set_time(&mut svm, 2_000);
+
+    // Реестр пуст, финализация невозможна
+    assert!(!send(&mut svm, &authority, finalize_ix(&a, &a, 1, 0)));
+
+    // Замораживаем первого холдера
+    assert!(send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h1.pubkey())));
+    assert_eq!(read_round(&svm, &round).frozen_supply, 10);
+    let h1_ata = ata(&h1.pubkey(), &bond_mint);
+    assert_eq!(svm.get_account(&h1_ata).unwrap().data[108], 2); // 2 = frozen
+
+    // Второй ещё не заморожен: реестр неполный
+    assert!(!send(&mut svm, &authority, finalize_ix(&a, &a, 1, 0)));
+
+    assert!(send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h2.pubkey())));
+    // Повторная заморозка запрещена
+    assert!(!send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h2.pubkey())));
+
+    // Теперь реестр полный
+    assert!(send(&mut svm, &authority, finalize_ix(&a, &a, 1, 0)));
+    let r = read_round(&svm, &round);
+    assert_eq!(r.snapshot_supply, 15);
+    assert_eq!(r.total_due, 750_000_000); // $750 всего
+    assert!(r.status == RoundStatus::Snapshotted);
+}
+
+#[test]
+fn only_authority_can_open_round() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+
+    let attacker = Keypair::new();
+    svm.airdrop(&attacker.pubkey(), 1_000_000_000).unwrap();
+    let ix = open_round_ix(&attacker.pubkey(), &a, 1, 0, 2_000);
+    assert!(!send(&mut svm, &attacker, ix));
+}
+
+#[test]
+fn rounds_are_sequential() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 0, 2_000)));
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 1, 3_000)));
+    // Пропустить номер нельзя
+    assert!(!send(&mut svm, &authority, open_round_ix(&a, &a, 1, 5, 4_000)));
+
+    let (bond, _, _) = pdas(&a, 1);
+    assert_eq!(read_bond(&svm, &bond).next_round, 2);
+}
+
+#[test]
+fn rejects_record_date_after_maturity() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+    let ix = open_round_ix(&a, &a, 1, 0, MATURITY_TS + 1);
     assert!(!send(&mut svm, &authority, ix));
 }

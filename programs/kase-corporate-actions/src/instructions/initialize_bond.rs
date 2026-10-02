@@ -92,6 +92,8 @@ pub fn handle_initialize_bond(
     bond.maturity_ts = maturity_ts;
     bond.status = BondStatus::Active;
     bond.bump = bump;
+    bond.next_round = 0;
+    bond.next_round = 0;
 
     msg!("Bond series {} initialized", series_id);
     Ok(())

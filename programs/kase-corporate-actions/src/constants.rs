@@ -10,4 +10,7 @@ pub const MINT_SEED: &[u8] = b"bond_mint";
 pub const VAULT_SEED: &[u8] = b"vault";
 
 #[constant]
+pub const ROUND_SEED: &[u8] = b"round";
+
+#[constant]
 pub const BPS_DENOMINATOR: u64 = 10_000;

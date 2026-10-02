@@ -14,4 +14,14 @@ pub enum ErrorCode {
     InvalidAmount,
     #[msg("Bond series is not active")]
     BondNotActive,
+    #[msg("Arithmetic overflow")]
+    MathOverflow,
+    #[msg("Record date must not be after maturity")]
+    RecordDateAfterMaturity,
+    #[msg("Record date has not been reached yet")]
+    RecordDateNotReached,
+    #[msg("Coupon round is not open")]
+    RoundNotOpen,
+    #[msg("Not all holders are frozen: snapshot is incomplete")]
+    SnapshotIncomplete,
 }
