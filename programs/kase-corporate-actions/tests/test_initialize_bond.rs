@@ -957,3 +957,75 @@ fn partial_cannot_be_paid_to_someone_elses_account() {
     assert!(!send(&mut svm, &authority, pay_partial_ix(&a, &a, 1, 0, &h1.pubkey(), thief_pay)));
     assert_eq!(token_balance(&svm, &thief_pay), 0);
 }
+
+// ---------- demo clock (time travel) ----------
+
+fn advance_ix(signer: &Pubkey, issuer: &Pubkey, series_id: u64, seconds: i64) -> Instruction {
+    let (bond_series, _, _) = pdas(issuer, series_id);
+    Instruction::new_with_bytes(
+        kase_corporate_actions::id(),
+        &kase_corporate_actions::instruction::AdvanceTime { seconds }.data(),
+        kase_corporate_actions::accounts::AdvanceTime {
+            authority: *signer,
+            bond_series,
+        }
+        .to_account_metas(None),
+    )
+}
+
+#[test]
+fn time_travel_unlocks_record_date() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+    let h1 = Keypair::new();
+    assert!(send(&mut svm, &authority, issue_ix(&a, &a, 1, &h1.pubkey(), 10)));
+
+    set_time(&mut svm, 1_000);
+    assert!(send(&mut svm, &authority, open_round_ix(&a, &a, 1, 0, 2_000)));
+
+    // Часы сети показывают 1000, record date ещё не наступила
+    assert!(!send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h1.pubkey())));
+
+    // Перематываем на 1000 секунд: симулированное время 2000
+    assert!(send(&mut svm, &authority, advance_ix(&a, &a, 1, 1_000)));
+    let (bond, _, _) = pdas(&a, 1);
+    assert_eq!(read_bond(&svm, &bond).time_offset, 1_000);
+    assert!(send(&mut svm, &authority, freeze_ix(&a, &a, 1, 0, &h1.pubkey())));
+}
+
+#[test]
+fn time_travel_unlocks_redemption() {
+    let (mut svm, authority, _pm, h1, _h2, h1_pay, _h2_pay) = prepare_redemption();
+    let a = authority.pubkey();
+
+    set_time(&mut svm, 1_000);
+    assert!(!send(&mut svm, &h1, redeem_ix(&a, 1, &h1.pubkey(), h1_pay)));
+
+    // Перематываем до срока погашения
+    assert!(send(&mut svm, &authority, advance_ix(&a, &a, 1, MATURITY_TS)));
+    assert!(send(&mut svm, &h1, redeem_ix(&a, 1, &h1.pubkey(), h1_pay)));
+    assert_eq!(token_balance(&svm, &h1_pay), 10_000_000_000);
+}
+
+#[test]
+fn time_travel_rules() {
+    let (mut svm, authority, payment_mint) = setup();
+    let a = authority.pubkey();
+    assert!(send(&mut svm, &authority, init_ix(&a, payment_mint, 1, 1000, 2, MATURITY_TS)));
+
+    // Только эмитент
+    let attacker = Keypair::new();
+    svm.airdrop(&attacker.pubkey(), 1_000_000_000).unwrap();
+    assert!(!send(&mut svm, &attacker, advance_ix(&attacker.pubkey(), &a, 1, 100)));
+
+    // Только вперёд
+    assert!(!send(&mut svm, &authority, advance_ix(&a, &a, 1, 0)));
+    assert!(!send(&mut svm, &authority, advance_ix(&a, &a, 1, -100)));
+
+    // Смещения складываются
+    assert!(send(&mut svm, &authority, advance_ix(&a, &a, 1, 100)));
+    assert!(send(&mut svm, &authority, advance_ix(&a, &a, 1, 50)));
+    let (bond, _, _) = pdas(&a, 1);
+    assert_eq!(read_bond(&svm, &bond).time_offset, 150);
+}
