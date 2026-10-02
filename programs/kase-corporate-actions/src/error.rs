@@ -38,4 +38,16 @@ pub enum ErrorCode {
     NotMatured,
     #[msg("Holder token account is frozen: thaw it before redeeming")]
     HolderAccountFrozen,
+    #[msg("Partial redemption rate must be between 1 and 9999 bps")]
+    InvalidPartialRate,
+    #[msg("Partial redemption is already scheduled for this round")]
+    PartialAlreadyScheduled,
+    #[msg("Partial redemption is not scheduled for this round")]
+    PartialNotScheduled,
+    #[msg("Partial redemption was already applied")]
+    PartialAlreadyApplied,
+    #[msg("Not all holders have received the partial redemption")]
+    PartialIncomplete,
+    #[msg("Partial redemption amount per bond rounds to zero")]
+    PartialPerBondZero,
 }

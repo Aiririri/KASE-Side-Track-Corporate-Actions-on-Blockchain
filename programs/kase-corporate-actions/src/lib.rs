@@ -64,4 +64,21 @@ pub mod kase_corporate_actions {
     pub fn redeem(ctx: Context<Redeem>) -> Result<()> {
         crate::instructions::redeem::handle_redeem(ctx)
     }
+
+    pub fn schedule_partial_redemption(
+        ctx: Context<SchedulePartialRedemption>,
+        bps: u16,
+    ) -> Result<()> {
+        crate::instructions::schedule_partial_redemption::handle_schedule_partial_redemption(
+            ctx, bps,
+        )
+    }
+
+    pub fn pay_partial_redemption(ctx: Context<PayPartialRedemption>) -> Result<()> {
+        crate::instructions::pay_partial_redemption::handle_pay_partial_redemption(ctx)
+    }
+
+    pub fn apply_partial_redemption(ctx: Context<ApplyPartialRedemption>) -> Result<()> {
+        crate::instructions::apply_partial_redemption::handle_apply_partial_redemption(ctx)
+    }
 }

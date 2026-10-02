@@ -45,6 +45,11 @@ pub struct CouponRound {
     pub bump: u8,
     pub paid_total: u64,
     pub holders_paid: u32,
+    pub partial_bps: u16,
+    pub partial_per_bond: u64,
+    pub partial_total_due: u64,
+    pub partial_paid_total: u64,
+    pub partial_applied: bool,
 }
 
 /// Квитанция: доказательство, что этому счёту за этот период уже заплачено

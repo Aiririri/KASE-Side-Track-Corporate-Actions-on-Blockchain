@@ -1,3 +1,4 @@
+pub mod apply_partial_redemption;
 pub mod finalize_record_date;
 pub mod freeze_holder;
 pub mod fund_vault;
@@ -5,9 +6,12 @@ pub mod initialize_bond;
 pub mod issue_bonds;
 pub mod open_coupon_round;
 pub mod pay_coupon;
+pub mod pay_partial_redemption;
 pub mod redeem;
+pub mod schedule_partial_redemption;
 pub mod thaw_holder;
 
+pub use apply_partial_redemption::*;
 pub use finalize_record_date::*;
 pub use freeze_holder::*;
 pub use fund_vault::*;
@@ -15,5 +19,7 @@ pub use initialize_bond::*;
 pub use issue_bonds::*;
 pub use open_coupon_round::*;
 pub use pay_coupon::*;
+pub use pay_partial_redemption::*;
 pub use redeem::*;
+pub use schedule_partial_redemption::*;
 pub use thaw_holder::*;

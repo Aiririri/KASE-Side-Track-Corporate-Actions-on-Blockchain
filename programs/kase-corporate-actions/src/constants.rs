@@ -20,3 +20,6 @@ pub const BPS_DENOMINATOR: u64 = 10_000;
 
 #[constant]
 pub const REDEEM_SEED: &[u8] = b"redeem";
+
+#[constant]
+pub const PARTIAL_SEED: &[u8] = b"partial";
