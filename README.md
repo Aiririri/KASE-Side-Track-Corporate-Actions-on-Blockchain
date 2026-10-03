@@ -21,6 +21,7 @@ Example from the task: 10 bonds × $1,000 × 10% ÷ 2 = **$500** coupon, and $10
 - Dashboard: https://kase-side-track-corporate-actions-o.vercel.app/
 - Program ID (devnet): `CNbAp4fpVhCP6TQ1uPkJv5VZHVZbffM2gvyVXFNJXYbX`
 - Full transaction log of a complete lifecycle run (39 transactions with explorer links): [docs/onchain-log.md](docs/onchain-log.md)
+- Second run with English labels (the series shown on the dashboard): [docs/live-onchain-log.md](docs/live-onchain-log.md)
 - Demo video: _coming soon_
 
 The dashboard reads everything directly from devnet: instrument state, holder registry per record date, corporate action rounds, payout receipts and redemptions.

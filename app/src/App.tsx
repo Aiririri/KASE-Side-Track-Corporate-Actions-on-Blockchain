@@ -3,7 +3,7 @@ import * as anchor from "@anchor-lang/core";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Buffer } from "buffer";
 import idl from "./idl.json";
-import log from "./onchain-log.json";
+import log from "./live-log.json";
 import Investor from "./Investor";
 
 const USDC = 1_000_000;
