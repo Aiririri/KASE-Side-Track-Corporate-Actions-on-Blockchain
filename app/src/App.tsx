@@ -4,6 +4,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { Buffer } from "buffer";
 import idl from "./idl.json";
 import log from "./onchain-log.json";
+import Investor from "./Investor";
 
 const USDC = 1_000_000;
 const money = (n: any) =>
@@ -123,6 +124,7 @@ export default function App() {
         <a href={addrUrl(log.programId)} target="_blank">{short(log.programId)}</a> · bond series{" "}
         <a href={addrUrl(log.bondSeries)} target="_blank">{short(log.bondSeries)}</a>
       </div>
+      <Investor />
       {err && <div className="card" style={{ color: "crimson" }}>{err}</div>}
       {!d && !err && <div className="card">Loading from devnet…</div>}
 
