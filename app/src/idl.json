@@ -1,0 +1,1420 @@
+{
+  "address": "CNbAp4fpVhCP6TQ1uPkJv5VZHVZbffM2gvyVXFNJXYbX",
+  "metadata": {
+    "name": "kase_corporate_actions",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "advance_time",
+      "discriminator": [
+        58,
+        85,
+        148,
+        20,
+        119,
+        39,
+        172,
+        79
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "seconds",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "apply_partial_redemption",
+      "discriminator": [
+        174,
+        169,
+        77,
+        105,
+        51,
+        12,
+        46,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "writable": true,
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "coupon_round",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize_record_date",
+      "discriminator": [
+        49,
+        27,
+        174,
+        208,
+        100,
+        207,
+        165,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "bond_mint",
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "coupon_round",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "freeze_holder",
+      "discriminator": [
+        42,
+        135,
+        144,
+        146,
+        54,
+        1,
+        196,
+        117
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "bond_mint",
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "coupon_round",
+          "writable": true
+        },
+        {
+          "name": "holder_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_vault",
+      "discriminator": [
+        26,
+        33,
+        207,
+        242,
+        119,
+        108,
+        134,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series"
+        },
+        {
+          "name": "source",
+          "docs": [
+            "Платёжный счёт эмитента, откуда берём деньги"
+          ],
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_bond",
+      "discriminator": [
+        135,
+        182,
+        183,
+        104,
+        169,
+        38,
+        102,
+        147
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "Эмитент: платит за создание аккаунтов и становится владельцем выпуска"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bond_series",
+          "docs": [
+            "Паспорт выпуска (PDA)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "arg",
+                "path": "series_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bond_mint",
+          "docs": [
+            "Токен облигации: 0 знаков, управляется программой (PDA)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_series"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payment_mint",
+          "docs": [
+            "Токен, которым платим купоны (тестовый USDC)"
+          ]
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "Хранилище денег на выплаты (PDA)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_series"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "series_id",
+          "type": "u64"
+        },
+        {
+          "name": "face_value",
+          "type": "u64"
+        },
+        {
+          "name": "coupon_rate_bps",
+          "type": "u16"
+        },
+        {
+          "name": "coupons_per_year",
+          "type": "u8"
+        },
+        {
+          "name": "maturity_ts",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "issue_bonds",
+      "discriminator": [
+        39,
+        114,
+        138,
+        94,
+        25,
+        182,
+        206,
+        137
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "Только эмитент может выпускать облигации"
+          ],
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series"
+        },
+        {
+          "name": "bond_mint",
+          "writable": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "holder"
+        },
+        {
+          "name": "holder_token_account",
+          "docs": [
+            "Токен-аккаунт инвестора под облигации (создаётся при первой выдаче)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "holder"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "open_coupon_round",
+      "discriminator": [
+        147,
+        52,
+        194,
+        130,
+        6,
+        140,
+        77,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "writable": true
+        },
+        {
+          "name": "coupon_round",
+          "docs": [
+            "Адрес периода зависит от его номера, поэтому периоды идут строго по порядку"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  117,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_series"
+              },
+              {
+                "kind": "account",
+                "path": "bond_series.next_round",
+                "account": "BondSeries"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "record_ts",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "pay_coupon",
+      "discriminator": [
+        235,
+        226,
+        45,
+        115,
+        95,
+        34,
+        46,
+        110
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "bond_mint",
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "coupon_round",
+          "writable": true
+        },
+        {
+          "name": "holder_token_account",
+          "docs": [
+            "Замороженный счёт холдера: его баланс равен балансу на record date"
+          ]
+        },
+        {
+          "name": "holder_payment_account",
+          "docs": [
+            "Куда платим: платёжный счёт именно этого холдера"
+          ],
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "receipt",
+          "docs": [
+            "Квитанция: повторное создание невозможно, значит, и двойная выплата тоже"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coupon_round"
+              },
+              {
+                "kind": "account",
+                "path": "holder_token_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "pay_partial_redemption",
+      "discriminator": [
+        140,
+        164,
+        81,
+        35,
+        28,
+        205,
+        99,
+        162
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "bond_mint",
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "coupon_round",
+          "writable": true
+        },
+        {
+          "name": "holder_token_account",
+          "docs": [
+            "Замороженный счёт холдера: баланс равен балансу на record date"
+          ]
+        },
+        {
+          "name": "holder_payment_account",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "receipt",
+          "docs": [
+            "Квитанция: повторное создание невозможно, значит, и двойная выплата тоже"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coupon_round"
+              },
+              {
+                "kind": "account",
+                "path": "holder_token_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "redeem",
+      "discriminator": [
+        184,
+        12,
+        86,
+        149,
+        70,
+        196,
+        97,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "holder",
+          "docs": [
+            "Холдер сам подписывает: сжигать токены может только владелец"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bond_series",
+          "writable": true
+        },
+        {
+          "name": "bond_mint",
+          "writable": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "holder_token_account",
+          "writable": true
+        },
+        {
+          "name": "holder_payment_account",
+          "docs": [
+            "Куда платим номинал: платёжный счёт этого же холдера"
+          ],
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "receipt",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  100,
+                  101,
+                  101,
+                  109
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_series"
+              },
+              {
+                "kind": "account",
+                "path": "holder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "schedule_partial_redemption",
+      "discriminator": [
+        60,
+        96,
+        237,
+        220,
+        180,
+        49,
+        254,
+        0
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "coupon_round",
+          "docs": [
+            "Реестр периода уже зафиксирован (замороженные холдеры)"
+          ],
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "thaw_holder",
+      "discriminator": [
+        56,
+        60,
+        31,
+        119,
+        186,
+        131,
+        171,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "bond_series",
+          "relations": [
+            "coupon_round"
+          ]
+        },
+        {
+          "name": "bond_mint",
+          "relations": [
+            "bond_series"
+          ]
+        },
+        {
+          "name": "coupon_round"
+        },
+        {
+          "name": "holder_token_account",
+          "writable": true
+        },
+        {
+          "name": "receipt",
+          "docs": [
+            "Разморозить можно только после выплаты: квитанция должна существовать"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coupon_round"
+              },
+              {
+                "kind": "account",
+                "path": "holder_token_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BondSeries",
+      "discriminator": [
+        212,
+        151,
+        78,
+        197,
+        178,
+        129,
+        246,
+        238
+      ]
+    },
+    {
+      "name": "CouponRound",
+      "discriminator": [
+        201,
+        63,
+        44,
+        177,
+        75,
+        102,
+        183,
+        44
+      ]
+    },
+    {
+      "name": "PayoutReceipt",
+      "discriminator": [
+        18,
+        170,
+        203,
+        23,
+        19,
+        67,
+        154,
+        216
+      ]
+    },
+    {
+      "name": "RedemptionReceipt",
+      "discriminator": [
+        220,
+        43,
+        221,
+        166,
+        174,
+        69,
+        111,
+        26
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidFaceValue",
+      "msg": "Face value must be greater than zero"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidCouponRate",
+      "msg": "Coupon rate must be between 0 and 10000 bps"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidCouponFrequency",
+      "msg": "Coupons per year must be 1, 2, 4 or 12"
+    },
+    {
+      "code": 6003,
+      "name": "MaturityInPast",
+      "msg": "Maturity date must be in the future"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6005,
+      "name": "BondNotActive",
+      "msg": "Bond series is not active"
+    },
+    {
+      "code": 6006,
+      "name": "MathOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6007,
+      "name": "RecordDateAfterMaturity",
+      "msg": "Record date must not be after maturity"
+    },
+    {
+      "code": 6008,
+      "name": "RecordDateNotReached",
+      "msg": "Record date has not been reached yet"
+    },
+    {
+      "code": 6009,
+      "name": "RoundNotOpen",
+      "msg": "Coupon round is not open"
+    },
+    {
+      "code": 6010,
+      "name": "SnapshotIncomplete",
+      "msg": "Not all holders are frozen: snapshot is incomplete"
+    },
+    {
+      "code": 6011,
+      "name": "RoundNotSnapshotted",
+      "msg": "Coupon round snapshot is not finalized"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidPaymentAccount",
+      "msg": "Invalid payment token account"
+    },
+    {
+      "code": 6013,
+      "name": "HolderNotFrozen",
+      "msg": "Holder account must be frozen at record date"
+    },
+    {
+      "code": 6014,
+      "name": "NothingToPay",
+      "msg": "Holder has no bonds to pay"
+    },
+    {
+      "code": 6015,
+      "name": "PayoutExceedsDue",
+      "msg": "Total payouts would exceed the amount due"
+    },
+    {
+      "code": 6016,
+      "name": "NotMatured",
+      "msg": "Bond has not reached maturity yet"
+    },
+    {
+      "code": 6017,
+      "name": "HolderAccountFrozen",
+      "msg": "Holder token account is frozen: thaw it before redeeming"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidPartialRate",
+      "msg": "Partial redemption rate must be between 1 and 9999 bps"
+    },
+    {
+      "code": 6019,
+      "name": "PartialAlreadyScheduled",
+      "msg": "Partial redemption is already scheduled for this round"
+    },
+    {
+      "code": 6020,
+      "name": "PartialNotScheduled",
+      "msg": "Partial redemption is not scheduled for this round"
+    },
+    {
+      "code": 6021,
+      "name": "PartialAlreadyApplied",
+      "msg": "Partial redemption was already applied"
+    },
+    {
+      "code": 6022,
+      "name": "PartialIncomplete",
+      "msg": "Not all holders have received the partial redemption"
+    },
+    {
+      "code": 6023,
+      "name": "PartialPerBondZero",
+      "msg": "Partial redemption amount per bond rounds to zero"
+    }
+  ],
+  "types": [
+    {
+      "name": "BondSeries",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "series_id",
+            "type": "u64"
+          },
+          {
+            "name": "bond_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "payment_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "face_value",
+            "type": "u64"
+          },
+          {
+            "name": "coupon_rate_bps",
+            "type": "u16"
+          },
+          {
+            "name": "coupons_per_year",
+            "type": "u8"
+          },
+          {
+            "name": "maturity_ts",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "BondStatus"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "next_round",
+            "type": "u32"
+          },
+          {
+            "name": "time_offset",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BondStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Redeemed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CouponRound",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bond_series",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_index",
+            "type": "u32"
+          },
+          {
+            "name": "record_ts",
+            "type": "i64"
+          },
+          {
+            "name": "coupon_per_bond",
+            "type": "u64"
+          },
+          {
+            "name": "frozen_supply",
+            "type": "u64"
+          },
+          {
+            "name": "snapshot_supply",
+            "type": "u64"
+          },
+          {
+            "name": "total_due",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "RoundStatus"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "paid_total",
+            "type": "u64"
+          },
+          {
+            "name": "holders_paid",
+            "type": "u32"
+          },
+          {
+            "name": "partial_bps",
+            "type": "u16"
+          },
+          {
+            "name": "partial_per_bond",
+            "type": "u64"
+          },
+          {
+            "name": "partial_total_due",
+            "type": "u64"
+          },
+          {
+            "name": "partial_paid_total",
+            "type": "u64"
+          },
+          {
+            "name": "partial_applied",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PayoutReceipt",
+      "docs": [
+        "Квитанция: доказательство, что этому счёту за этот период уже заплачено"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coupon_round",
+            "type": "pubkey"
+          },
+          {
+            "name": "holder",
+            "type": "pubkey"
+          },
+          {
+            "name": "holder_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonds",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "paid_ts",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RedemptionReceipt",
+      "docs": [
+        "Квитанция о погашении: накапливается, если холдер гасит несколько раз"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bond_series",
+            "type": "pubkey"
+          },
+          {
+            "name": "holder",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonds_redeemed",
+            "type": "u64"
+          },
+          {
+            "name": "amount_paid",
+            "type": "u64"
+          },
+          {
+            "name": "last_ts",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoundStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Snapshotted"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "BOND_SEED",
+      "type": "bytes",
+      "value": "[98, 111, 110, 100]"
+    },
+    {
+      "name": "BPS_DENOMINATOR",
+      "type": "u64",
+      "value": "10000"
+    },
+    {
+      "name": "MINT_SEED",
+      "type": "bytes",
+      "value": "[98, 111, 110, 100, 95, 109, 105, 110, 116]"
+    },
+    {
+      "name": "PARTIAL_SEED",
+      "type": "bytes",
+      "value": "[112, 97, 114, 116, 105, 97, 108]"
+    },
+    {
+      "name": "RECEIPT_SEED",
+      "type": "bytes",
+      "value": "[114, 101, 99, 101, 105, 112, 116]"
+    },
+    {
+      "name": "REDEEM_SEED",
+      "type": "bytes",
+      "value": "[114, 101, 100, 101, 101, 109]"
+    },
+    {
+      "name": "ROUND_SEED",
+      "type": "bytes",
+      "value": "[114, 111, 117, 110, 100]"
+    },
+    {
+      "name": "VAULT_SEED",
+      "type": "bytes",
+      "value": "[118, 97, 117, 108, 116]"
+    }
+  ]
+}

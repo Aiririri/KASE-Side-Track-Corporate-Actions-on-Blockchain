@@ -1,0 +1,305 @@
+{
+  "cluster": "devnet",
+  "programId": "CNbAp4fpVhCP6TQ1uPkJv5VZHVZbffM2gvyVXFNJXYbX",
+  "issuer": "H8dRE9LxhdmHUrRjzaTxiRCgqpAzHzkXVY3GWsXwEJVS",
+  "seriesId": 1790978093,
+  "bondSeries": "CXoUecbsiGTGQybK5bioHr75k1drjbCAjiWJf58aLHbA",
+  "bondMint": "CZ7xQT7NbJ7FBjpcTpjBDy7fxP8EnTwGKkiojHPieEb9",
+  "vault": "AnmvB48okzyJB52jLbTd7CpT6y3vsXmmAitcwxVrLqmr",
+  "testUsdcMint": "8FS7r7QW83eEncTRZQ3mtSDLdsUr4f2NG8jNTyqkgEZu",
+  "holders": [
+    {
+      "name": "Alice",
+      "wallet": "8JeEy8omgwkeguZLRL9PCn6D59bg7aArFZR1e9go2L4M",
+      "bondAccount": "2mXUdEiRaFptD6bVAMfuCy16GsZJPyaipDs4ran24XAq",
+      "usdcAccount": "GXaBSspk4iMLbgna4bDLVUKwikxQrXUxeMfhB1UbmGtJ"
+    },
+    {
+      "name": "Bob",
+      "wallet": "7oLPkdo1CdVDNe9Mww4yTE3Dv2YCnfUmB8imE7zbvYCU",
+      "bondAccount": "13G2maUFSF3qYVgtfg1x5XXQxhG2r4GMFoC2v7DNMPnx",
+      "usdcAccount": "6tZ8LBnd92eHQQosMcga5awxckfvU3DMdzpWkmTJaCWg"
+    },
+    {
+      "name": "Carol",
+      "wallet": "BWatUAJSFpJdc9bkQ5kNm7rtqjnTz8K9DnPhniUFG4HD",
+      "bondAccount": "HkTQZRo5JMUJuv2v44y3fmCAZPTZf8BTpXrzTzANVpDc",
+      "usdcAccount": "7cCbiWsEUur2tTCnMTwzsRhZqMgiMyEWKsSjyRqKfUXE"
+    }
+  ],
+  "steps": [
+    {
+      "n": 1,
+      "title": "Выпуск облигации",
+      "detail": "номинал $1000, купон 10%, 2 раза в год, погашение через 2 года",
+      "signature": "65mbJVHtNLcTmc9cU43DMdQXT2wLZEWTkZf1kt5vCnMdhsTccWf3quHaMad4asjFXpgaL1UXy1PxG5wFx9wJr7dE",
+      "url": "https://explorer.solana.com/tx/65mbJVHtNLcTmc9cU43DMdQXT2wLZEWTkZf1kt5vCnMdhsTccWf3quHaMad4asjFXpgaL1UXy1PxG5wFx9wJr7dE?cluster=devnet"
+    },
+    {
+      "n": 2,
+      "title": "Выдача облигаций: Alice",
+      "detail": "10 шт.",
+      "signature": "5B5wmkJwhCmeUd88xBMFEnFnwDWBwETvaSWNfhn4QWJy9e3NJZaAXXYxzBiMJXFe9X7MwhkrhLuFsAHiisajT9CQ",
+      "url": "https://explorer.solana.com/tx/5B5wmkJwhCmeUd88xBMFEnFnwDWBwETvaSWNfhn4QWJy9e3NJZaAXXYxzBiMJXFe9X7MwhkrhLuFsAHiisajT9CQ?cluster=devnet"
+    },
+    {
+      "n": 3,
+      "title": "Выдача облигаций: Bob",
+      "detail": "5 шт.",
+      "signature": "ZLHkE3z8sdugMEFWKACUSYJ2g815ShGcB8xaSo13kfHsk76bxVtrk9Lzdiph1Xifnzb6MhTn3Y79dz719p5mQ2F",
+      "url": "https://explorer.solana.com/tx/ZLHkE3z8sdugMEFWKACUSYJ2g815ShGcB8xaSo13kfHsk76bxVtrk9Lzdiph1Xifnzb6MhTn3Y79dz719p5mQ2F?cluster=devnet"
+    },
+    {
+      "n": 4,
+      "title": "Выдача облигаций: Carol",
+      "detail": "3 шт.",
+      "signature": "65JSGXkyY6RUYozjJHg8oWrGAjiCwXoY35EFG2CjUT8LaBNxSbvARfDKZ8CwHL2xc7Mcpn5epngdtxmoNvq52jTL",
+      "url": "https://explorer.solana.com/tx/65JSGXkyY6RUYozjJHg8oWrGAjiCwXoY35EFG2CjUT8LaBNxSbvARfDKZ8CwHL2xc7Mcpn5epngdtxmoNvq52jTL?cluster=devnet"
+    },
+    {
+      "n": 5,
+      "title": "Перевод между холдерами",
+      "detail": "Alice передаёт Carol 2 облигации (баланс будет 8 / 5 / 5)",
+      "signature": "4R6TjvjtdywFjxBtvqNgb7oVSk4eFeeu46KeqjTL7UH2NcWPRiQqSHf7fwh4NNF9MHrjDEruS4UM6u5jwEvwVw6h",
+      "url": "https://explorer.solana.com/tx/4R6TjvjtdywFjxBtvqNgb7oVSk4eFeeu46KeqjTL7UH2NcWPRiQqSHf7fwh4NNF9MHrjDEruS4UM6u5jwEvwVw6h?cluster=devnet"
+    },
+    {
+      "n": 6,
+      "title": "Открытие купонного периода №1",
+      "detail": "record date через 182 дня",
+      "signature": "AmXVvKe1RZD5i4MqqbbLYjuruvKc9iwx5s37qM21SkxNVZfkRaFtkVUPocSTk92xjZrYz6P4NAyQ6ca644GFP8R",
+      "url": "https://explorer.solana.com/tx/AmXVvKe1RZD5i4MqqbbLYjuruvKc9iwx5s37qM21SkxNVZfkRaFtkVUPocSTk92xjZrYz6P4NAyQ6ca644GFP8R?cluster=devnet"
+    },
+    {
+      "n": 7,
+      "title": "Перемотка времени (демо)",
+      "detail": "+182 дня",
+      "signature": "28FpY8EkxCnWP8AMQZdz8kY6QQBEQcKHyPQ9VZLfXXEBSSRQVFxzksvkwa6ao4gD94rCzzd5NbG41AHsSmFBcic1",
+      "url": "https://explorer.solana.com/tx/28FpY8EkxCnWP8AMQZdz8kY6QQBEQcKHyPQ9VZLfXXEBSSRQVFxzksvkwa6ao4gD94rCzzd5NbG41AHsSmFBcic1?cluster=devnet"
+    },
+    {
+      "n": 8,
+      "title": "Заморозка реестра: Alice",
+      "detail": "8 шт. на record date",
+      "signature": "5dKjdaWz6Lon2kD8gHYNeT8136SmzZs96F4LtrjR5ksKb1WraRjpraYeGVsqYx8RqEb29va8GjKJ6VKzKgNf8YnX",
+      "url": "https://explorer.solana.com/tx/5dKjdaWz6Lon2kD8gHYNeT8136SmzZs96F4LtrjR5ksKb1WraRjpraYeGVsqYx8RqEb29va8GjKJ6VKzKgNf8YnX?cluster=devnet"
+    },
+    {
+      "n": 9,
+      "title": "Заморозка реестра: Bob",
+      "detail": "5 шт. на record date",
+      "signature": "5GaR7yFQr4VTKqo2LV8bvLENpjiXH81fGbWKem9GrUTUAGaAhmWUcDq2THYagXg2WLSPYr4EWqu1H9Em6JYnkZki",
+      "url": "https://explorer.solana.com/tx/5GaR7yFQr4VTKqo2LV8bvLENpjiXH81fGbWKem9GrUTUAGaAhmWUcDq2THYagXg2WLSPYr4EWqu1H9Em6JYnkZki?cluster=devnet"
+    },
+    {
+      "n": 10,
+      "title": "Заморозка реестра: Carol",
+      "detail": "5 шт. на record date",
+      "signature": "2WTXSVfJnoc4B7fKfqtEuEojeZjpfRyHgFygVWPLxFaBuqrSRF1713ep69HH2jVidLER4KT6eG7Zskrkab47ydzN",
+      "url": "https://explorer.solana.com/tx/2WTXSVfJnoc4B7fKfqtEuEojeZjpfRyHgFygVWPLxFaBuqrSRF1713ep69HH2jVidLER4KT6eG7Zskrkab47ydzN?cluster=devnet"
+    },
+    {
+      "n": 11,
+      "title": "Фиксация реестра",
+      "detail": "замороженная сумма равна выпуску, считаем total_due",
+      "signature": "5XZP6qjq1rgbMK1g8C6FxC5k5KjAa1fCPY7iZ7EPjsLsK5v5sb8N1NdKreRZGG2y4uvDBX3E6fueKfJ4NXemgV1a",
+      "url": "https://explorer.solana.com/tx/5XZP6qjq1rgbMK1g8C6FxC5k5KjAa1fCPY7iZ7EPjsLsK5v5sb8N1NdKreRZGG2y4uvDBX3E6fueKfJ4NXemgV1a?cluster=devnet"
+    },
+    {
+      "n": 12,
+      "title": "Пополнение vault",
+      "detail": "$5400: купон + частичное погашение",
+      "signature": "269PgvpEAfWTHGhf62mkjrebM1FuU8s6Njp1Y4zNx12vzuLsLuMPbvSsT7LLhpgwCK9FpuRv3KAmR4yKJruXKR8i",
+      "url": "https://explorer.solana.com/tx/269PgvpEAfWTHGhf62mkjrebM1FuU8s6Njp1Y4zNx12vzuLsLuMPbvSsT7LLhpgwCK9FpuRv3KAmR4yKJruXKR8i?cluster=devnet"
+    },
+    {
+      "n": 13,
+      "title": "Купон №1: Alice",
+      "detail": "8 × $50 = $400",
+      "signature": "54Boautmpzd9vaH4Y3SL5kWW2N2aHfq9EZtqUsuDGiZPrfAewYimqDJBRskqeUBEo9kGAny1c9sSzswjcRWnh3Jx",
+      "url": "https://explorer.solana.com/tx/54Boautmpzd9vaH4Y3SL5kWW2N2aHfq9EZtqUsuDGiZPrfAewYimqDJBRskqeUBEo9kGAny1c9sSzswjcRWnh3Jx?cluster=devnet"
+    },
+    {
+      "n": 14,
+      "title": "Купон №1: Bob",
+      "detail": "5 × $50 = $250",
+      "signature": "33QRcASCmugE7hy73CZ9MqduBqpzBLk7HMSBLjFs961JRsBZ2pbWs2zqjp73QTKb73VHBu97aeFZjdjmQbr9nUcj",
+      "url": "https://explorer.solana.com/tx/33QRcASCmugE7hy73CZ9MqduBqpzBLk7HMSBLjFs961JRsBZ2pbWs2zqjp73QTKb73VHBu97aeFZjdjmQbr9nUcj?cluster=devnet"
+    },
+    {
+      "n": 15,
+      "title": "Купон №1: Carol",
+      "detail": "5 × $50 = $250",
+      "signature": "2q2KUmciq5oaHnt91eLnvMt75k5D9ifcPctb6VvEYsthmS5zT4fwq51SCHyvuq5GmvNu5sLW8HLQ1rWjZxSEVAha",
+      "url": "https://explorer.solana.com/tx/2q2KUmciq5oaHnt91eLnvMt75k5D9ifcPctb6VvEYsthmS5zT4fwq51SCHyvuq5GmvNu5sLW8HLQ1rWjZxSEVAha?cluster=devnet"
+    },
+    {
+      "n": 16,
+      "title": "Объявление частичного погашения",
+      "detail": "25% номинала, $250 на облигацию",
+      "signature": "5eU8SAxFyZgq6x9GgZFUrab9SPLXjmE2oBWueMrMb8mh5dcGHu5AdPfRZyK8V97oTe6UPtzmt7mP1TQcqo38WLxg",
+      "url": "https://explorer.solana.com/tx/5eU8SAxFyZgq6x9GgZFUrab9SPLXjmE2oBWueMrMb8mh5dcGHu5AdPfRZyK8V97oTe6UPtzmt7mP1TQcqo38WLxg?cluster=devnet"
+    },
+    {
+      "n": 17,
+      "title": "Частичное погашение: Alice",
+      "detail": "8 × $250 = $2000",
+      "signature": "3jUcq97whV955Fg8V77UMYhnKpZs4uWqA3ukNyie65qa264yTGNcshR14xvVCQBWr6XV5tfCZpDmm7umvW1CFSDr",
+      "url": "https://explorer.solana.com/tx/3jUcq97whV955Fg8V77UMYhnKpZs4uWqA3ukNyie65qa264yTGNcshR14xvVCQBWr6XV5tfCZpDmm7umvW1CFSDr?cluster=devnet"
+    },
+    {
+      "n": 18,
+      "title": "Частичное погашение: Bob",
+      "detail": "5 × $250 = $1250",
+      "signature": "4vygVhvtVSuS1ZqB4qu2Xij5HHAaSDWGZNXVVDitszqeSgQh2txRiLuhs63EGPw9utPfjEMuf3fHxAegtYPb8cyp",
+      "url": "https://explorer.solana.com/tx/4vygVhvtVSuS1ZqB4qu2Xij5HHAaSDWGZNXVVDitszqeSgQh2txRiLuhs63EGPw9utPfjEMuf3fHxAegtYPb8cyp?cluster=devnet"
+    },
+    {
+      "n": 19,
+      "title": "Частичное погашение: Carol",
+      "detail": "5 × $250 = $1250",
+      "signature": "vqUAt5xexfUkNrbvTSWi57PWDyYe8TTTwq8RnyRu6UgaKeqXQ1LL4hA12GCFZZb64kQPbnJJEu2AGz7Q1ThPrZy",
+      "url": "https://explorer.solana.com/tx/vqUAt5xexfUkNrbvTSWi57PWDyYe8TTTwq8RnyRu6UgaKeqXQ1LL4hA12GCFZZb64kQPbnJJEu2AGz7Q1ThPrZy?cluster=devnet"
+    },
+    {
+      "n": 20,
+      "title": "Применение частичного погашения",
+      "detail": "номинал $1000 → $750",
+      "signature": "5jzXsGqQu3MkrNQfeZVvm3N97GfTxGVRP5CyMFHc25zoEBHGT1qm88HTcvXzap66xL3jjztSXFVDh97zLG3hXdw7",
+      "url": "https://explorer.solana.com/tx/5jzXsGqQu3MkrNQfeZVvm3N97GfTxGVRP5CyMFHc25zoEBHGT1qm88HTcvXzap66xL3jjztSXFVDh97zLG3hXdw7?cluster=devnet"
+    },
+    {
+      "n": 21,
+      "title": "Разморозка: Alice",
+      "detail": "выплата получена, счёт снова свободен",
+      "signature": "3HoTSy2SGdEgAPETcTYgqZ2GeSKn86XqTNBm1Z4imMKNrrw4pVqrh9hJFpZqdA1sbJnRxyUGPWS6NmhFKffqmYCC",
+      "url": "https://explorer.solana.com/tx/3HoTSy2SGdEgAPETcTYgqZ2GeSKn86XqTNBm1Z4imMKNrrw4pVqrh9hJFpZqdA1sbJnRxyUGPWS6NmhFKffqmYCC?cluster=devnet"
+    },
+    {
+      "n": 22,
+      "title": "Разморозка: Bob",
+      "detail": "выплата получена, счёт снова свободен",
+      "signature": "2Pg1qhTxA8tYaRJUk8Di4d4SRwZCWxvq6M6Z7Mgyi1CfZ34BshaF1CPBUVD6pdZRoBnuQGa39STxdjLEsWwxULMs",
+      "url": "https://explorer.solana.com/tx/2Pg1qhTxA8tYaRJUk8Di4d4SRwZCWxvq6M6Z7Mgyi1CfZ34BshaF1CPBUVD6pdZRoBnuQGa39STxdjLEsWwxULMs?cluster=devnet"
+    },
+    {
+      "n": 23,
+      "title": "Разморозка: Carol",
+      "detail": "выплата получена, счёт снова свободен",
+      "signature": "2gKyskRvKL1REk2qfj6ocYyBUZoFitqCxK56Ubm5TWbQRGBzKn3vgjgRVrtD6rJ5UmLihnWL7kiaLT8hpVqgGaEh",
+      "url": "https://explorer.solana.com/tx/2gKyskRvKL1REk2qfj6ocYyBUZoFitqCxK56Ubm5TWbQRGBzKn3vgjgRVrtD6rJ5UmLihnWL7kiaLT8hpVqgGaEh?cluster=devnet"
+    },
+    {
+      "n": 24,
+      "title": "Открытие купонного периода №2 (финальный)",
+      "detail": "record date = дата погашения",
+      "signature": "29HXsGcduE3y8rK3LdiPLudnbqXHZTJeH3t9VAfCVkamKD4STnhQivNvWyVDGRDuvTo84tpip95FjeU3WyTveBkE",
+      "url": "https://explorer.solana.com/tx/29HXsGcduE3y8rK3LdiPLudnbqXHZTJeH3t9VAfCVkamKD4STnhQivNvWyVDGRDuvTo84tpip95FjeU3WyTveBkE?cluster=devnet"
+    },
+    {
+      "n": 25,
+      "title": "Перемотка времени (демо)",
+      "detail": "+548 дней до даты погашения",
+      "signature": "38PBsfuZ9zvyeT4vBtincRidc5csjgyWNP2vZ2DY1oKeomBJDo4UZiN8auuYPpYw9xRmsettncUez6Aj7VDSNXZz",
+      "url": "https://explorer.solana.com/tx/38PBsfuZ9zvyeT4vBtincRidc5csjgyWNP2vZ2DY1oKeomBJDo4UZiN8auuYPpYw9xRmsettncUez6Aj7VDSNXZz?cluster=devnet"
+    },
+    {
+      "n": 26,
+      "title": "Заморозка реестра: Alice",
+      "detail": "8 шт. на record date",
+      "signature": "3Fdq4XGhvXfW7pPLB17Akfe7TatqhcWsyUcwRS8ryRJYmepCfJP3TzWnhievgvEzhqBh6z9nc3dqn1hNpV9pY9jZ",
+      "url": "https://explorer.solana.com/tx/3Fdq4XGhvXfW7pPLB17Akfe7TatqhcWsyUcwRS8ryRJYmepCfJP3TzWnhievgvEzhqBh6z9nc3dqn1hNpV9pY9jZ?cluster=devnet"
+    },
+    {
+      "n": 27,
+      "title": "Заморозка реестра: Bob",
+      "detail": "5 шт. на record date",
+      "signature": "3XiCmsNLnEuxJVSH6nmPZEdxUiVf2ToEZUJbCi8CMhYgtFTFzUUUmj41Kut9UM6BSsdPVW43veF9ho6T8apbTgZ2",
+      "url": "https://explorer.solana.com/tx/3XiCmsNLnEuxJVSH6nmPZEdxUiVf2ToEZUJbCi8CMhYgtFTFzUUUmj41Kut9UM6BSsdPVW43veF9ho6T8apbTgZ2?cluster=devnet"
+    },
+    {
+      "n": 28,
+      "title": "Заморозка реестра: Carol",
+      "detail": "5 шт. на record date",
+      "signature": "3uoFTnu4Ni4Eu6qzRZUAx6W8MkNwKcJMLfQkE56P2MNBkaT1mBjHqyW8Y6QUCZ2otzyFrELzFgH674SpuwQ1a3Wn",
+      "url": "https://explorer.solana.com/tx/3uoFTnu4Ni4Eu6qzRZUAx6W8MkNwKcJMLfQkE56P2MNBkaT1mBjHqyW8Y6QUCZ2otzyFrELzFgH674SpuwQ1a3Wn?cluster=devnet"
+    },
+    {
+      "n": 29,
+      "title": "Фиксация реестра",
+      "detail": "замороженная сумма равна выпуску, считаем total_due",
+      "signature": "4Nf7ZMsXSBxcsLuKpJjo6KEv4yg7cfbVHExm4QfZLktxnem6eRTryhSiz1jqxdKYGNsdKUe48pUS3rE5r1eNdq4A",
+      "url": "https://explorer.solana.com/tx/4Nf7ZMsXSBxcsLuKpJjo6KEv4yg7cfbVHExm4QfZLktxnem6eRTryhSiz1jqxdKYGNsdKUe48pUS3rE5r1eNdq4A?cluster=devnet"
+    },
+    {
+      "n": 30,
+      "title": "Пополнение vault",
+      "detail": "$14175: финальный купон + номинал к погашению",
+      "signature": "3FHLb7JiVAy6MdkDi8Evn4ugUM9EfrqHwHHxni167YWADKBgUhTQPdYG46jHgtt6qVeXcgMC1pqSyKd9NZWCeZiX",
+      "url": "https://explorer.solana.com/tx/3FHLb7JiVAy6MdkDi8Evn4ugUM9EfrqHwHHxni167YWADKBgUhTQPdYG46jHgtt6qVeXcgMC1pqSyKd9NZWCeZiX?cluster=devnet"
+    },
+    {
+      "n": 31,
+      "title": "Купон №2: Alice",
+      "detail": "8 × $37.5 = $300",
+      "signature": "49J8nydaiFJfDihH7gsGzAbkf9p43h5t6bER9VjZ3sYKNnXB4abS6GGFwsaYS7TjrhdJdZqqygRyn6Rpf2Rf858p",
+      "url": "https://explorer.solana.com/tx/49J8nydaiFJfDihH7gsGzAbkf9p43h5t6bER9VjZ3sYKNnXB4abS6GGFwsaYS7TjrhdJdZqqygRyn6Rpf2Rf858p?cluster=devnet"
+    },
+    {
+      "n": 32,
+      "title": "Купон №2: Bob",
+      "detail": "5 × $37.5 = $187.5",
+      "signature": "3VwpyHJhvNdVJinqixQD6KSj9bPewb9Yo1naa72kbBPk72XWeEFsB3TiH8oy9CX9M45FaY5PmWuoknZWx3dT2b5D",
+      "url": "https://explorer.solana.com/tx/3VwpyHJhvNdVJinqixQD6KSj9bPewb9Yo1naa72kbBPk72XWeEFsB3TiH8oy9CX9M45FaY5PmWuoknZWx3dT2b5D?cluster=devnet"
+    },
+    {
+      "n": 33,
+      "title": "Купон №2: Carol",
+      "detail": "5 × $37.5 = $187.5",
+      "signature": "2znB7fjiJJmF3ETyCirkpsPugtMK339YKAyFiJTg7sVrWbnW9ehnVHkS6GGvjPacnyvebjbk5xdBG8Mzka27WvZF",
+      "url": "https://explorer.solana.com/tx/2znB7fjiJJmF3ETyCirkpsPugtMK339YKAyFiJTg7sVrWbnW9ehnVHkS6GGvjPacnyvebjbk5xdBG8Mzka27WvZF?cluster=devnet"
+    },
+    {
+      "n": 34,
+      "title": "Разморозка: Alice",
+      "detail": "выплата получена, счёт снова свободен",
+      "signature": "557Xu4uLHJSYktvhw57faUyyGRL7TxNujpodqHUkJySB6qoRDECDsCehJNHs6ENTGqmcZDQxejm4V1yKAtafCp31",
+      "url": "https://explorer.solana.com/tx/557Xu4uLHJSYktvhw57faUyyGRL7TxNujpodqHUkJySB6qoRDECDsCehJNHs6ENTGqmcZDQxejm4V1yKAtafCp31?cluster=devnet"
+    },
+    {
+      "n": 35,
+      "title": "Разморозка: Bob",
+      "detail": "выплата получена, счёт снова свободен",
+      "signature": "2wHVSHuQG5c7qhHaoVnN44qa55zrqo2QVFMJm6qmTUbTKJrrxvaiB5GkFPv84zsaVyf9SSDUYzD79BLLNwGYLJFw",
+      "url": "https://explorer.solana.com/tx/2wHVSHuQG5c7qhHaoVnN44qa55zrqo2QVFMJm6qmTUbTKJrrxvaiB5GkFPv84zsaVyf9SSDUYzD79BLLNwGYLJFw?cluster=devnet"
+    },
+    {
+      "n": 36,
+      "title": "Разморозка: Carol",
+      "detail": "выплата получена, счёт снова свободен",
+      "signature": "3C5G8WBgGJSJfKKmrV5ALTfu5hbY4jqsYE6pzmWS8ywdwMLVZpr5ZpZRzgyqYtFnksnZV2whpqaW4FpRhAYKVckx",
+      "url": "https://explorer.solana.com/tx/3C5G8WBgGJSJfKKmrV5ALTfu5hbY4jqsYE6pzmWS8ywdwMLVZpr5ZpZRzgyqYtFnksnZV2whpqaW4FpRhAYKVckx?cluster=devnet"
+    },
+    {
+      "n": 37,
+      "title": "Погашение: Alice",
+      "detail": "8 × $750 = $6000, облигации сожжены",
+      "signature": "3LZEkMaSjCas1aZFCgG58sRjQGQZsvvBNSHCyiqv9nLqBK8oMAgHh8jq9LdoeBHFEgKfNxWkrCGbA2vMd92iZXfA",
+      "url": "https://explorer.solana.com/tx/3LZEkMaSjCas1aZFCgG58sRjQGQZsvvBNSHCyiqv9nLqBK8oMAgHh8jq9LdoeBHFEgKfNxWkrCGbA2vMd92iZXfA?cluster=devnet"
+    },
+    {
+      "n": 38,
+      "title": "Погашение: Bob",
+      "detail": "5 × $750 = $3750, облигации сожжены",
+      "signature": "2y1kCsC2QgUekHHTCycYbnxwDV2z6PD5CTeLaZJaotuMhRifJzA91CybjaS3VvucZfgGt45bW5nYieAtnUp4ifwv",
+      "url": "https://explorer.solana.com/tx/2y1kCsC2QgUekHHTCycYbnxwDV2z6PD5CTeLaZJaotuMhRifJzA91CybjaS3VvucZfgGt45bW5nYieAtnUp4ifwv?cluster=devnet"
+    },
+    {
+      "n": 39,
+      "title": "Погашение: Carol",
+      "detail": "5 × $750 = $3750, облигации сожжены",
+      "signature": "2SPQT2VfEqofwPQjzcdwbwuTaVZbt9nEQxh9KvrWdhWQFxcpSpbWyBqG7KQmTrjTWQwufGmKgf3ELjWzBD1F8K3N",
+      "url": "https://explorer.solana.com/tx/2SPQT2VfEqofwPQjzcdwbwuTaVZbt9nEQxh9KvrWdhWQFxcpSpbWyBqG7KQmTrjTWQwufGmKgf3ELjWzBD1F8K3N?cluster=devnet"
+    }
+  ]
+}
